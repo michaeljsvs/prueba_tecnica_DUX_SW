@@ -1,0 +1,42 @@
+/*Todos los productos del rubro "librería", creados hoy.*/
+
+SELECT nombre
+FROM producto LEFT JOIN rubro ON producto.id_rubro=rubro.id_rubro
+WHERE rubro.rubro='libreria' AND producto.fecha_creacion = CURDATE();
+
+/*Monto total vendido por cliente (mostrar nombre del cliente y monto).*/
+
+SELECT cliente.nombre, SUM(cantidad*precio_unitario) as monto_total_venta
+FROM venta LEFT JOIN cliente ON venta.id_cliente=cliente.id_cliente
+GROUP BY cliente.nombre;
+
+/*Cantidad de ventas por producto.*/
+
+SELECT producto.nombre, SUM(cantidad) as cantidad_venta
+FROM venta LEFT JOIN producto ON venta.codigo_producto=producto.codigo
+GROUP BY producto.nombre;
+
+/*Cantidad de productos comprados por cliente en el mes actual.*/
+
+SELECT cliente.nombre, SUM(cantidad) as cant_prod_compr
+FROM venta LEFT JOIN cliente ON venta.id_cliente=cliente.id_cliente
+WHERE EXTRACT(MONTH FROM venta.fecha) = EXTRACT(MONTH FROM CURDATE())
+GROUP BY cliente.nombre;
+
+/*Ventas que tienen al menos un producto del rubro "bazar"*/
+
+SELECT venta.*
+FROM venta LEFT JOIN producto ON venta.codigo_producto=producto.codigo 
+LEFT JOIN rubro ON producto.id_rubro=rubro.id_rubro
+WHERE rubro.rubro = 'bazar';
+
+/*Rubros que no tienen ventas en los últimos 2 meses.*/
+SELECT *
+FROM rubro
+WHERE rubro.rubro NOT IN (SELECT rubro.rubro
+	FROM rubro LEFT JOIN producto ON rubro.id_rubro = producto.id_rubro
+	LEFT JOIN venta ON producto.codigo = venta.codigo_producto
+	WHERE venta.fecha > DATE(NOW() - INTERVAL 2 MONTH));
+
+
+
